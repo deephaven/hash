@@ -1,0 +1,270 @@
+/*
+ Copyright (C) 2021 Deephaven Data Labs (https://deephaven.io).
+
+ This program is free software: you can redistribute it and/or modify it under the terms of the
+ GNU Lesser General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU Lesser General Public License for more details.
+*/
+package io.deephaven.hash;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class TestKeyedIntObjectHashMap extends AbstractTestGenericMap<Integer, KeyedIntTestObject> {
+  private static Logger log = LoggerFactory.getLogger(TestKeyedIntObjectHashMap.class);
+
+  public TestKeyedIntObjectHashMap(String name) {
+    super(name, 100);
+  }
+
+  private static Random random = new Random(101763);
+
+  public HashMap<Integer, KeyedIntTestObject> generateUniqueRandomHashMap(
+      int size, int min_key, int max_key) {
+    HashMap<Integer, KeyedIntTestObject> m = new HashMap<>(size);
+    assert min_key < max_key;
+    assert max_key - min_key > size;
+    while (m.size() != size) {
+      int key = random.nextInt(max_key - min_key) + min_key;
+      if (!m.containsKey(key)) {
+        m.put(key, new KeyedIntTestObject(key));
+      }
+    }
+    return m;
+  }
+
+  protected Map<Integer, KeyedIntTestObject> newTestMap(
+      int initialSize, Map<Integer, KeyedIntTestObject> from) {
+    KeyedIntTestObjectMap map = new KeyedIntTestObjectMap(initialSize);
+    if (from != null) {
+      for (KeyedIntTestObject o : from.values()) {
+        map.put(o.getId(), o);
+      }
+    }
+    return map;
+  }
+
+  protected void compact(Map map) {
+    assert map instanceof KeyedIntTestObjectMap;
+    ((KeyedIntTestObjectMap) map).compact();
+  }
+
+  protected KeyedIntTestObject[] newValueArray(int n) {
+    return new KeyedIntTestObject[n];
+  }
+
+  protected Integer[] newKeyArray(int n) {
+    return new Integer[n];
+  }
+
+  protected KeyedIntTestObject newValue(Integer key) {
+    return new KeyedIntTestObject(key);
+  }
+
+  protected Integer getKey(KeyedIntTestObject value) {
+    return value.getId();
+  }
+
+  /**
+   * If the test subject is an indexable map, make sure the getByIndex method returns identical
+   * objects
+   */
+  protected <K, V> void assertConsistency(Map<K, V> subject) {
+    assert subject instanceof KeyedIntTestObjectMap;
+    IndexableMap<Integer, KeyedIntTestObject> imap =
+        (IndexableMap<Integer, KeyedIntTestObject>) subject;
+    for (int i = 0; i < imap.size(); ++i) {
+      KeyedIntTestObject o = imap.getByIndex(i);
+      assertTrue("values are identical", o == subject.get(o.getId()));
+    }
+  }
+
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
+  }
+
+  @Override
+  public void tearDown() throws Exception {
+    super.tearDown();
+  }
+
+  /*
+   ** tests the unboxed putIfAbsent call
+   */
+  public void testSimpleUnboxedPutIfAbsent() {
+    final KeyedIntTestObjectMap m = new KeyedIntTestObjectMap();
+
+    // create two objects that are equals() but not identical
+    KeyedIntTestObject o1 = new KeyedIntTestObject(42);
+    KeyedIntTestObject o2 = new KeyedIntTestObject(42);
+
+    KeyedIntTestObject result;
+
+    result = m.putIfAbsent(o1.getId(), o1);
+    assertTrue(result == null);
+
+    result = m.putIfAbsent(o2.getId(), o2);
+    assertTrue(result == o1);
+
+    assertTrue(m.get(o2.getId()) == o1);
+  }
+
+  /*
+   ** tests for KeyedIntObjectMaps -- putIfAbsent(K, ValueFactory)
+   */
+  public class KIOMPutIfAbsent<V> extends Thread {
+    public final int numRuns;
+    public final HashMap<Integer, V> objects;
+    public final KeyedIntObjectHash<V> map;
+    public final KeyedIntObjectHash.ValueFactory<V> factory;
+
+    public KIOMPutIfAbsent(
+        int numRuns,
+        HashMap<Integer, V> objects,
+        KeyedIntObjectHash<V> map,
+        KeyedIntObjectHash.ValueFactory<V> factory) {
+      this.numRuns = numRuns;
+      this.objects = objects;
+      this.map = map;
+      this.factory = factory;
+    }
+
+    public int numRemoves = 0;
+
+    public void run() {
+      for (int i = 0; i < numRuns; ++i) {
+        for (Integer k : objects.keySet()) {
+          map.putIfAbsent(k.intValue(), factory); // make sure we call the right method!
+        }
+      }
+      for (Integer k : objects.keySet()) {
+        if (random.nextDouble() < 0.4) {
+          if (map.removeKey(k.intValue()) != null) { // make sure we call the right method!
+            ++numRemoves;
+          }
+        }
+        if (random.nextDouble() < 0.01) {
+          compact((Map<Integer, V>) map);
+        }
+      }
+      for (Integer k : objects.keySet()) {
+        map.putIfAbsent(k.intValue(), factory); // make sure we call the right method!
+      }
+    }
+  }
+
+  private static class KIOMPutIfAbsentFactory<V> implements KeyedIntObjectHash.ValueFactory<V> {
+    public final HashMap<Integer, V> objects;
+
+    public KIOMPutIfAbsentFactory(HashMap<Integer, V> objects) {
+      this.objects = objects;
+    }
+
+    public int numCalls = 0;
+
+    public V newValue(Integer key) {
+      ++numCalls;
+      return objects.get(key);
+    }
+
+    public V newValue(int key) {
+      ++numCalls;
+      return objects.get(key);
+    }
+  }
+
+  public void testKIOMPutIfAbsent() {
+    final Map<Integer, KeyedIntTestObject> map = newTestMap(10, null);
+    if (!(map instanceof KeyedIntObjectHash)) {
+      return;
+    }
+    KeyedIntObjectHash<KeyedIntTestObject> KIOM = ((KeyedIntObjectHash<KeyedIntTestObject>) map);
+
+    final HashMap<Integer, KeyedIntTestObject> objects =
+        generateUniqueRandomHashMap(SIZE * 10, MIN_KEY, MAX_KEY);
+    final KIOMPutIfAbsentFactory<KeyedIntTestObject> factory =
+        new KIOMPutIfAbsentFactory<>(objects);
+    final int NUM_THREADS = 5;
+    final int NUM_RUNS = 100;
+
+    ArrayList<KIOMPutIfAbsent> mutators = new ArrayList<KIOMPutIfAbsent>(NUM_THREADS);
+    for (int i = 0; i < NUM_THREADS; ++i) {
+      mutators.add(new KIOMPutIfAbsent(NUM_RUNS, objects, KIOM, factory));
+    }
+    for (int i = 0; i < NUM_THREADS; ++i) {
+      mutators.get(i).start();
+    }
+    int totalRemoves = 0;
+    for (int i = 0; i < NUM_THREADS; ++i) {
+      while (true) {
+        try {
+          KIOMPutIfAbsent m = mutators.get(i);
+          m.join();
+          totalRemoves += m.numRemoves;
+          log.info("testKIOMPutIfAbsent: mutator " + i + " had " + m.numRemoves + " removes");
+          break;
+        } catch (InterruptedException x) {
+          // don't care
+        }
+      }
+    }
+
+    log.info(
+        "Factory had "
+            + factory.numCalls
+            + " calls, objects.size() is "
+            + objects.size()
+            + " total successful removes was "
+            + totalRemoves);
+    assertMapsEqual(map, objects);
+    assertConsistency(map);
+    assertEquals(objects.size() + totalRemoves, factory.numCalls);
+  }
+
+  public void testKIOMConcurrentGet() {
+    final Map<Integer, KeyedIntTestObject> map = newTestMap(10, null);
+    if (!(map instanceof KeyedIntObjectHash)) {
+      return;
+    }
+    final KeyedIntObjectHash<KeyedIntTestObject> SUT =
+        ((KeyedIntObjectHash<KeyedIntTestObject>) map);
+
+    final long MILLIS = 1000;
+
+    Thread setter =
+        new Thread() {
+          @Override
+          public void run() {
+            long t0 = System.currentTimeMillis();
+            while (System.currentTimeMillis() < t0 + MILLIS) {
+              for (int i = 0; i < SUT.capacity(); ++i) {
+                SUT.put(i, new KeyedIntTestObject(i));
+                SUT.removeKey(i);
+              }
+            }
+          }
+        };
+
+    setter.start();
+
+    long t0 = System.currentTimeMillis();
+    try {
+      while (System.currentTimeMillis() < t0 + MILLIS) {
+        // doesn't matter what key we get here - just has to be
+        SUT.get(1);
+      }
+      setter.join();
+    } catch (Exception x) {
+      fail("Unhandled exception: " + x);
+    }
+  }
+}

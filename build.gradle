@@ -1,0 +1,76 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+    id 'com.diffplug.spotless' version '5.11.1'
+}
+
+repositories {
+    jcenter()
+}
+
+group = 'io.deephaven'
+version = '0.1.0'
+description = 'Fork of trove4j library'
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+    testImplementation 'junit:junit:4.11'
+    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
+
+    testImplementation 'org.slf4j:slf4j-api:1.7.30'
+    testImplementation 'org.slf4j:slf4j-simple:1.7.30'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+spotless {
+    java {
+        googleJavaFormat()
+    }
+}
+
+java {
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            pom {
+                name = 'deephaven/hash'
+                description = 'Fork of trove4j library'
+                url = 'https://github.com/deephaven/hash'
+                licenses {
+                    license {
+                        name = 'LGPLv3'
+                        url = 'https://www.gnu.org/licenses/lgpl-3.0.txt'
+                    }
+                }
+                scm {
+                    url = 'https://github.com/deephaven/hash'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = 'ossrh'
+            // Will pick up ossrhUsername, ossrhPassword
+            credentials(PasswordCredentials)
+
+            def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
+}
