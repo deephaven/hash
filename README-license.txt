@@ -1,5 +1,5 @@
 The Trove library is licensed under the Lesser GNU Public License,
-which is included with the distribution in a file called LICENSE.
+which is included with the distribution in a file called COPYING.LESSER.
 
 
 The PrimeFinder and HashFunctions classes in Trove are subject to the
