@@ -30,8 +30,9 @@ public abstract class KHash implements Cloneable {
 
   /**
    * Determines how full the internal table can become before rehashing is required. This must be a
-   * value in the range: 0.0 < loadFactor < 1.0. The default value is 0.5, which is about as large
-   * as you can get in open addressing without hurting performance. Cf. Knuth, Volume 3., Chapter 6.
+   * value in the range: 0.0 &lt; loadFactor &lt; 1.0. The default value is 0.5, which is about as
+   * large as you can get in open addressing without hurting performance. Cf. Knuth, Volume 3.,
+   * Chapter 6.
    */
   protected float _loadFactor;
 
@@ -97,9 +98,9 @@ public abstract class KHash implements Cloneable {
   protected abstract int capacity();
 
   /**
-   * Ensure that this hashtable has sufficient capacity to hold <tt>desiredCapacity<tt>
-   * <b>additional</b> elements without requiring a rehash. This is a tuning method you can call
-   * before doing a large insert.
+   * Ensure that this hashtable has sufficient capacity to hold desiredCapacity <b>additional</b>
+   * elements without requiring a rehash. This is a tuning method you can call before doing a large
+   * insert.
    *
    * @param desiredCapacity an <code>int</code> value
    */

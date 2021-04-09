@@ -36,6 +36,7 @@ spotless {
 
 java {
     withSourcesJar()
+    withJavadocJar()
 }
 
 publishing {
@@ -43,18 +44,28 @@ publishing {
         mavenJava(MavenPublication) {
             from components.java
             pom {
-                name = 'deephaven/hash'
+                name = 'io.deephaven:hash'
                 description = 'Fork of trove4j library'
                 url = 'https://github.com/deephaven/hash'
                 licenses {
                     license {
-                        name = 'LGPLv3'
+                        name = 'LGPL-3.0-or-later'
                         url = 'https://www.gnu.org/licenses/lgpl-3.0.txt'
                     }
                 }
                 scm {
-                    url = 'https://github.com/deephaven/hash'
+                    url = 'https://github.com/deephaven/hash/tree/main'
+                    connection = 'scm:git:git://github.com/deephaven/hash.git'
+                    developerConnection = 'scm:git:ssh://github.com/deephaven/hash.git'
                 }
+                developers {
+                    developer {
+                        id = 'devinrsmith'
+                        name = 'Devin Smith'
+                        email = 'devinsmith@deephaven.io'
+                    }
+                }
+
             }
         }
     }

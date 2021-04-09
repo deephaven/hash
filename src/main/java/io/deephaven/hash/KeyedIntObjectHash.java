@@ -17,16 +17,16 @@ import java.io.Serializable;
  * This collection implements a hashed set of objects identified by a key; the characteristics of
  * the key are defined by an instance of the KeyedObjectKey interface.
  *
- * <p>This class implements most of both the Set<V> and ConcurrentMap<K,V> interfaces. It can't
- * fully implement both because of discrepancies in the signatures and/or semantics of the remove(),
+ * <p>This class implements most of both the Set and ConcurrentMap interfaces. It can't fully
+ * implement both because of discrepancies in the signatures and/or semantics of the remove(),
  * equals() and hashCode() methods. The subclasses KeyedObjectHashMap and KeyedObjectHashSet fill in
  * the missing bits.
  *
  * <p>In cases where the key to a map is just an attribute of the mapped value, this design will
- * save memory over an equivalent Map<K,V> instance, since no extra slot is required to hold a
- * reference to (or in the worst case, a copy of) the key attribute. This can be significant if the
- * key attribute is a primitive int. We also use an open-addressed hash, so Map.Entry instance are
- * also unnecessary except for iteration over the entrySet() collection.
+ * save memory over an equivalent Map instance, since no extra slot is required to hold a reference
+ * to (or in the worst case, a copy of) the key attribute. This can be significant if the key
+ * attribute is a primitive int. We also use an open-addressed hash, so Map.Entry instance are also
+ * unnecessary except for iteration over the entrySet() collection.
  *
  * <p>HOWEVER: note that open-addressed hashing may not be appropriate for tables whose populations
  * grow and shrink dynamically. This is because the markers for deleted slots can lengthen probe
