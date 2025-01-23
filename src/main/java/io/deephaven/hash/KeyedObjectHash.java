@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -170,7 +171,7 @@ public class KeyedObjectHash<K, V> extends KHash implements Serializable, Iterab
    */
   protected int setUp(int initialCapacity) {
     int capacity = super.setUp(initialCapacity);
-    storage = (V[]) new Object[capacity];
+      storage = (V[]) new Object[capacity];
     return capacity;
   }
 
@@ -704,7 +705,7 @@ public class KeyedObjectHash<K, V> extends KHash implements Serializable, Iterab
       throw new IllegalArgumentException(
           "key and value are inconsistent:" + key + " and " + keyDef.getKey(newValue));
     }
-    return internalPut(newValue, REPLACE, oldValue) != null;
+    return Objects.equals(internalPut(newValue, REPLACE, oldValue), oldValue);
   }
 
   public synchronized boolean add(V value) {
@@ -761,7 +762,7 @@ public class KeyedObjectHash<K, V> extends KHash implements Serializable, Iterab
           }
           return null;
         } else if (candidate != DELETED && keyDef.equalKey(key, candidate)) {
-          if (mode != IF_ABSENT) {
+          if (mode != IF_ABSENT && (oldValue == null || candidate.equals(oldValue))) {
             state[index] = value;
             _indexableList = null;
           }

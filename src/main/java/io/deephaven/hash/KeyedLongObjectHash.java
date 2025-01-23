@@ -12,6 +12,7 @@
 package io.deephaven.hash;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * This collection implements a hashed set of objects identified by a key; the characteristics of
@@ -253,7 +254,7 @@ public class KeyedLongObjectHash<V> extends KeyedObjectHash<Long, V> implements 
       throw new IllegalArgumentException(
           "key and value are inconsistent:" + key + " and " + longKeyDef.getLongKey(newValue));
     }
-    return internalPut(newValue, KeyedLongObjectHash.REPLACE, oldValue) != null;
+    return Objects.equals(internalPut(newValue, KeyedLongObjectHash.REPLACE, oldValue), oldValue);
   }
 
   public synchronized boolean replace(long key, V oldValue, V newValue) {
@@ -261,7 +262,7 @@ public class KeyedLongObjectHash<V> extends KeyedObjectHash<Long, V> implements 
       throw new IllegalArgumentException(
           "key and value are inconsistent:" + key + " and " + longKeyDef.getLongKey(newValue));
     }
-    return internalPut(newValue, KeyedLongObjectHash.REPLACE, oldValue) != null;
+    return Objects.equals(internalPut(newValue, KeyedLongObjectHash.REPLACE, oldValue), oldValue);
   }
 
   private static final int NORMAL = 0;
@@ -305,7 +306,8 @@ public class KeyedLongObjectHash<V> extends KeyedObjectHash<Long, V> implements 
           }
           return null;
         } else if (candidate != DELETED && longKeyDef.equalLongKey(key, candidate)) {
-          if (mode != KeyedLongObjectHash.IF_ABSENT) {
+          if (mode != KeyedLongObjectHash.IF_ABSENT
+              && (oldValue == null || candidate.equals(oldValue))) {
             state[index] = value;
             _indexableList = null;
           }
