@@ -36,7 +36,7 @@ class KeyedDoubleTestObject {
   }
 
   public static final KeyedDoubleObjectKey<KeyedDoubleTestObject> keyDef =
-      new KeyedDoubleObjectKey<>() {
+      new KeyedDoubleObjectKey<KeyedDoubleTestObject>() {
         public Double getKey(KeyedDoubleTestObject v) {
           return v.getId();
         }
@@ -64,7 +64,7 @@ class KeyedDoubleTestObject {
       };
 
   public static final KeyedIntObjectHash.ValueFactory<KeyedDoubleTestObject> factory =
-      new KeyedIntObjectHash.ValueFactory<>() {
+      new KeyedIntObjectHash.ValueFactory<KeyedDoubleTestObject>() {
         public KeyedDoubleTestObject newValue(Integer key) {
           return new KeyedDoubleTestObject(key);
         }
@@ -79,7 +79,7 @@ class KeyedDoubleTestObject {
   private KeyedDoubleTestObject next;
 
   public static final IntrusiveChainedHashAdapter<KeyedDoubleTestObject> adapter =
-      new IntrusiveChainedHashAdapter<>() {
+      new IntrusiveChainedHashAdapter<KeyedDoubleTestObject>() {
         @Override
         public KeyedDoubleTestObject getNext(KeyedDoubleTestObject self) {
           return self.next;
