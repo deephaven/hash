@@ -701,11 +701,14 @@ public class KeyedObjectHash<K, V> extends KHash implements Serializable, Iterab
   }
 
   public synchronized boolean replace(K key, V oldValue, V newValue) {
+    if (oldValue == null) {
+      throw new NullPointerException("oldValue is null, but this map cannot hold null values");
+    }
     if (!keyDef.equalKey(key, newValue)) {
       throw new IllegalArgumentException(
           "key and value are inconsistent:" + key + " and " + keyDef.getKey(newValue));
     }
-    return Objects.equals(internalPut(newValue, REPLACE, oldValue), oldValue);
+    return internalPut(newValue, REPLACE, oldValue).equals(oldValue);
   }
 
   public synchronized boolean add(V value) {
