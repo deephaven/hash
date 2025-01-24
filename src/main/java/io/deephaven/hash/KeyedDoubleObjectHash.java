@@ -313,7 +313,8 @@ public class KeyedDoubleObjectHash<V> extends KeyedObjectHash<Double, V> impleme
           }
           return null;
         } else if (candidate != DELETED && doubleKeyDef.equalDoubleKey(key, candidate)) {
-          if (mode != KeyedDoubleObjectHash.IF_ABSENT) {
+          if (mode != KeyedDoubleObjectHash.IF_ABSENT
+              && (oldValue == null || candidate.equals(oldValue))) {
             state[index] = value;
             _indexableList = null;
           }
