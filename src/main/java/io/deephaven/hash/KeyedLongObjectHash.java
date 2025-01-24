@@ -12,7 +12,6 @@
 package io.deephaven.hash;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * This collection implements a hashed set of objects identified by a key; the characteristics of
