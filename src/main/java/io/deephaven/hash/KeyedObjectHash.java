@@ -171,7 +171,7 @@ public class KeyedObjectHash<K, V> extends KHash implements Serializable, Iterab
    */
   protected int setUp(int initialCapacity) {
     int capacity = super.setUp(initialCapacity);
-      storage = (V[]) new Object[capacity];
+    storage = (V[]) new Object[capacity];
     return capacity;
   }
 
