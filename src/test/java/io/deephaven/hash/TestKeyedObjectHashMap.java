@@ -274,4 +274,69 @@ public class TestKeyedObjectHashMap extends AbstractTestGenericMap<String, Keyed
       fail("Unhandled exception: " + x);
     }
   }
+
+  public void testSimpleKOMReplace() {
+    KeyedTestObject result;
+    final KeyedTestObjectMap m = new KeyedTestObjectMap(10);
+
+    final KeyedTestObject o1 = new KeyedTestObject("0");
+    final KeyedTestObject o2 = new KeyedTestObject("0");
+    final KeyedTestObject o3 = new KeyedTestObject("0");
+
+    result = m.putIfAbsent("0", o1);
+    assertNull(result);
+    assertSame(m.get("0"), o1); // strict equality test
+
+    result = m.putIfAbsent("0", o2);
+    assertNotNull(result);
+    assertSame(m.get("0"), o1); // strict equality test
+
+    result = m.put("0", o2);
+    assertNotNull(result);
+    assertSame(result, o1); // strict equality test
+    assertSame(m.get("0"), o2); // strict equality test
+
+    assertFalse(m.replace("0", new KeyedTestObject("10"), o3));
+    assertSame(m.get("0"), o2); // strict equality test
+
+    assertTrue(m.replace("0", new KeyedTestObject("0"), o3));
+    assertSame(m.get("0"), o3); // strict equality test
+  }
+
+  /*
+   * Reproducer for bug documented in DH-18265
+   */
+  public void testDH18265() {
+    KeyedTestObject result;
+
+    final KeyedTestObjectMap m = new KeyedTestObjectMap(10);
+
+    // This test relies on the fact that `FB` and `Ea` hash to the same value.
+
+    final KeyedTestObject o1 = new KeyedTestObject("FB");
+    result = m.putIfAbsent("FB", o1);
+    assertNull(result);
+    assertSame(m.get("FB"), o1); // strict equality test
+
+    // This hash collides with `FB`, but will be double hashed to an empty slot.
+    final KeyedTestObject o2 = new KeyedTestObject("Ea");
+    result = m.putIfAbsent("Ea", o2);
+    assertNull(result);
+    assertSame(m.get("Ea"), o2); // strict equality test
+
+    // Remove the first object, leaving a DELETED tombstone at the first slot.
+    result = m.remove("FB");
+    assertNotNull(result);
+    assertSame(result, o1); // strict equality test
+
+    // This replace should fail, since we do not match old values.
+    final KeyedTestObject o3 = new KeyedTestObject("AB");
+    final KeyedTestObject o4 = new KeyedTestObject("Ea");
+    assertFalse(m.replace("Ea", o3, o4));
+    assertSame(m.get("Ea"), o2); // strict equality test
+
+    // This replace should succeed, since we match the old value.
+    assertTrue(m.replace("Ea", o2, o4));
+    assertSame(m.get("Ea"), o4); // strict equality test
+  }
 }

@@ -18,34 +18,35 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TestKeyedIntObjectHashMap extends AbstractTestGenericMap<Integer, KeyedIntTestObject> {
-  private static Logger log = LoggerFactory.getLogger(TestKeyedIntObjectHashMap.class);
+public class TestKeyedDoubleObjectHashMap
+    extends AbstractTestGenericMap<Double, KeyedDoubleTestObject> {
+  private static Logger log = LoggerFactory.getLogger(TestKeyedDoubleObjectHashMap.class);
 
-  public TestKeyedIntObjectHashMap(String name) {
+  public TestKeyedDoubleObjectHashMap(String name) {
     super(name, 100);
   }
 
   private static Random random = new Random(101763);
 
-  public HashMap<Integer, KeyedIntTestObject> generateUniqueRandomHashMap(
+  public HashMap<Double, KeyedDoubleTestObject> generateUniqueRandomHashMap(
       int size, int min_key, int max_key) {
-    HashMap<Integer, KeyedIntTestObject> m = new HashMap<>(size);
+    HashMap<Double, KeyedDoubleTestObject> m = new HashMap<>(size);
     assert min_key < max_key;
     assert max_key - min_key > size;
     while (m.size() != size) {
-      int key = random.nextInt(max_key - min_key) + min_key;
+      double key = (double) random.nextInt(max_key - min_key) + min_key;
       if (!m.containsKey(key)) {
-        m.put(key, new KeyedIntTestObject(key));
+        m.put(key, new KeyedDoubleTestObject(key));
       }
     }
     return m;
   }
 
-  protected Map<Integer, KeyedIntTestObject> newTestMap(
-      int initialSize, Map<Integer, KeyedIntTestObject> from) {
-    KeyedIntTestObjectMap map = new KeyedIntTestObjectMap(initialSize);
+  protected Map<Double, KeyedDoubleTestObject> newTestMap(
+      int initialSize, Map<Double, KeyedDoubleTestObject> from) {
+    KeyedDoubleTestObjectMap map = new KeyedDoubleTestObjectMap(initialSize);
     if (from != null) {
-      for (KeyedIntTestObject o : from.values()) {
+      for (KeyedDoubleTestObject o : from.values()) {
         map.put(o.getId(), o);
       }
     }
@@ -53,23 +54,23 @@ public class TestKeyedIntObjectHashMap extends AbstractTestGenericMap<Integer, K
   }
 
   protected void compact(Map map) {
-    assert map instanceof KeyedIntTestObjectMap;
-    ((KeyedIntTestObjectMap) map).compact();
+    assert map instanceof KeyedDoubleTestObjectMap;
+    ((KeyedDoubleTestObjectMap) map).compact();
   }
 
-  protected KeyedIntTestObject[] newValueArray(int n) {
-    return new KeyedIntTestObject[n];
+  protected KeyedDoubleTestObject[] newValueArray(int n) {
+    return new KeyedDoubleTestObject[n];
   }
 
-  protected Integer[] newKeyArray(int n) {
-    return new Integer[n];
+  protected Double[] newKeyArray(int n) {
+    return new Double[n];
   }
 
-  protected KeyedIntTestObject newValue(Integer key) {
-    return new KeyedIntTestObject(key);
+  protected KeyedDoubleTestObject newValue(Double key) {
+    return new KeyedDoubleTestObject(key);
   }
 
-  protected Integer getKey(KeyedIntTestObject value) {
+  protected Double getKey(KeyedDoubleTestObject value) {
     return value.getId();
   }
 
@@ -78,11 +79,11 @@ public class TestKeyedIntObjectHashMap extends AbstractTestGenericMap<Integer, K
    * objects
    */
   protected <K, V> void assertConsistency(Map<K, V> subject) {
-    assert subject instanceof KeyedIntTestObjectMap;
-    IndexableMap<Integer, KeyedIntTestObject> imap =
-        (IndexableMap<Integer, KeyedIntTestObject>) subject;
+    assert subject instanceof KeyedDoubleTestObjectMap;
+    IndexableMap<Integer, KeyedDoubleTestObject> imap =
+        (IndexableMap<Integer, KeyedDoubleTestObject>) subject;
     for (int i = 0; i < imap.size(); ++i) {
-      KeyedIntTestObject o = imap.getByIndex(i);
+      KeyedDoubleTestObject o = imap.getByIndex(i);
       assertTrue("values are identical", o == subject.get(o.getId()));
     }
   }
@@ -101,13 +102,13 @@ public class TestKeyedIntObjectHashMap extends AbstractTestGenericMap<Integer, K
    ** tests the unboxed putIfAbsent call
    */
   public void testSimpleUnboxedPutIfAbsent() {
-    final KeyedIntTestObjectMap m = new KeyedIntTestObjectMap();
+    final KeyedDoubleTestObjectMap m = new KeyedDoubleTestObjectMap();
 
     // create two objects that are equals() but not identical
-    KeyedIntTestObject o1 = new KeyedIntTestObject(42);
-    KeyedIntTestObject o2 = new KeyedIntTestObject(42);
+    KeyedDoubleTestObject o1 = new KeyedDoubleTestObject(42);
+    KeyedDoubleTestObject o2 = new KeyedDoubleTestObject(42);
 
-    KeyedIntTestObject result;
+    KeyedDoubleTestObject result;
 
     result = m.putIfAbsent(o1.getId(), o1);
     assertTrue(result == null);
@@ -122,13 +123,13 @@ public class TestKeyedIntObjectHashMap extends AbstractTestGenericMap<Integer, K
    ** tests the unboxed replace call
    */
   public void testSimpleUnboxedReplace() {
-    KeyedIntTestObject result;
+    KeyedDoubleTestObject result;
 
-    final KeyedIntTestObjectMap m = new KeyedIntTestObjectMap(10);
+    final KeyedDoubleTestObjectMap m = new KeyedDoubleTestObjectMap(10);
 
-    final KeyedIntTestObject o1 = new KeyedIntTestObject(0);
-    final KeyedIntTestObject o2 = new KeyedIntTestObject(0);
-    final KeyedIntTestObject o3 = new KeyedIntTestObject(0);
+    final KeyedDoubleTestObject o1 = new KeyedDoubleTestObject(0);
+    final KeyedDoubleTestObject o2 = new KeyedDoubleTestObject(0);
+    final KeyedDoubleTestObject o3 = new KeyedDoubleTestObject(0);
 
     result = m.putIfAbsent(0, o1);
     assertNull(result);
@@ -143,10 +144,10 @@ public class TestKeyedIntObjectHashMap extends AbstractTestGenericMap<Integer, K
     assertSame(result, o1); // strict equality test
     assertSame(m.get(0), o2); // strict equality test
 
-    assertFalse(m.replace(0, new KeyedIntTestObject(10), o3));
+    assertFalse(m.replace(0, new KeyedDoubleTestObject(10), o3));
     assertSame(m.get(0), o2); // strict equality test
 
-    assertTrue(m.replace(0, new KeyedIntTestObject(0), o3));
+    assertTrue(m.replace(0, new KeyedDoubleTestObject(0), o3));
     assertSame(m.get(0), o3); // strict equality test
   }
 
@@ -154,39 +155,39 @@ public class TestKeyedIntObjectHashMap extends AbstractTestGenericMap<Integer, K
    * Reproducer for bug documented in DH-18265
    */
   public void testDH18265() {
-    KeyedIntTestObject result;
+    KeyedDoubleTestObject result;
 
-    final KeyedIntTestObjectMap m = new KeyedIntTestObjectMap(10);
+    final KeyedDoubleTestObjectMap m = new KeyedDoubleTestObjectMap(2);
 
-    // Setup the conditions for the bug to be triggered.
-    final int capacity = m.capacity();
+    // Setup the conditions for the bug to be triggered. Not all powers of two work, but this does.
+    final double initial = 2 << 16;
+    final double collision = initial + m.capacity();
 
-    // This will hash to 0 internally
-    final KeyedIntTestObject o1 = new KeyedIntTestObject(capacity);
-    result = m.putIfAbsent(capacity, o1);
+    final KeyedDoubleTestObject o1 = new KeyedDoubleTestObject(initial);
+    result = m.putIfAbsent(initial, o1);
     assertNull(result);
-    assertSame(m.get(capacity), o1); // strict equality test
+    assertSame(m.get(initial), o1); // strict equality test
 
-    // This will also initially hash to 0, but will be double hashed to an empty slot.
-    final KeyedIntTestObject o2 = new KeyedIntTestObject(0);
-    result = m.putIfAbsent(0, o2);
+    // This will also initially collide, but will be double hashed to an empty slot.
+    final KeyedDoubleTestObject o2 = new KeyedDoubleTestObject(collision);
+    result = m.putIfAbsent(collision, o2);
     assertNull(result);
-    assertSame(m.get(0), o2); // strict equality test
+    assertSame(m.get(collision), o2); // strict equality test
 
-    // Remove the first object, leaving a DELETED tombstone at the 0 slot.
-    result = m.remove(capacity);
+    // Remove the first object, leaving a DELETED tombstone at the slot.
+    result = m.remove(initial);
     assertNotNull(result);
     assertSame(result, o1); // strict equality test
 
     // This replace should fail, since we do not match old values.
-    final KeyedIntTestObject o3 = new KeyedIntTestObject(10);
-    final KeyedIntTestObject o4 = new KeyedIntTestObject(0);
-    assertFalse(m.replace(0, o3, o4));
-    assertSame(m.get(0), o2); // strict equality test
+    final KeyedDoubleTestObject o3 = new KeyedDoubleTestObject(10);
+    final KeyedDoubleTestObject o4 = new KeyedDoubleTestObject(collision);
+    assertFalse(m.replace(collision, o3, o4));
+    assertSame(m.get(collision), o2); // strict equality test
 
     // This replace should succeed, since we match the old value.
-    assertTrue(m.replace(0, o2, o4));
-    assertSame(m.get(0), o4); // strict equality test
+    assertTrue(m.replace(collision, o2, o4));
+    assertSame(m.get(collision), o4); // strict equality test
   }
 
   /*
@@ -194,15 +195,15 @@ public class TestKeyedIntObjectHashMap extends AbstractTestGenericMap<Integer, K
    */
   public class KIOMPutIfAbsent<V> extends Thread {
     public final int numRuns;
-    public final HashMap<Integer, V> objects;
-    public final KeyedIntObjectHash<V> map;
-    public final KeyedIntObjectHash.ValueFactory<V> factory;
+    public final HashMap<Double, V> objects;
+    public final KeyedDoubleObjectHash<V> map;
+    public final KeyedDoubleObjectHash.ValueFactory<V> factory;
 
     public KIOMPutIfAbsent(
         int numRuns,
-        HashMap<Integer, V> objects,
-        KeyedIntObjectHash<V> map,
-        KeyedIntObjectHash.ValueFactory<V> factory) {
+        HashMap<Double, V> objects,
+        KeyedDoubleObjectHash<V> map,
+        KeyedDoubleObjectHash.ValueFactory<V> factory) {
       this.numRuns = numRuns;
       this.objects = objects;
       this.map = map;
@@ -213,11 +214,11 @@ public class TestKeyedIntObjectHashMap extends AbstractTestGenericMap<Integer, K
 
     public void run() {
       for (int i = 0; i < numRuns; ++i) {
-        for (Integer k : objects.keySet()) {
+        for (Double k : objects.keySet()) {
           map.putIfAbsent(k.intValue(), factory); // make sure we call the right method!
         }
       }
-      for (Integer k : objects.keySet()) {
+      for (Double k : objects.keySet()) {
         if (random.nextDouble() < 0.4) {
           if (map.removeKey(k.intValue()) != null) { // make sure we call the right method!
             ++numRemoves;
@@ -227,42 +228,43 @@ public class TestKeyedIntObjectHashMap extends AbstractTestGenericMap<Integer, K
           compact((Map<Integer, V>) map);
         }
       }
-      for (Integer k : objects.keySet()) {
+      for (Double k : objects.keySet()) {
         map.putIfAbsent(k.intValue(), factory); // make sure we call the right method!
       }
     }
   }
 
-  private static class KIOMPutIfAbsentFactory<V> implements KeyedIntObjectHash.ValueFactory<V> {
-    public final HashMap<Integer, V> objects;
+  private static class KIOMPutIfAbsentFactory<V> implements KeyedDoubleObjectHash.ValueFactory<V> {
+    public final HashMap<Double, V> objects;
 
-    public KIOMPutIfAbsentFactory(HashMap<Integer, V> objects) {
+    public KIOMPutIfAbsentFactory(HashMap<Double, V> objects) {
       this.objects = objects;
     }
 
     public int numCalls = 0;
 
-    public V newValue(Integer key) {
+    public V newValue(Double key) {
       ++numCalls;
       return objects.get(key);
     }
 
-    public V newValue(int key) {
+    public V newValue(double key) {
       ++numCalls;
       return objects.get(key);
     }
   }
 
   public void testKIOMPutIfAbsent() {
-    final Map<Integer, KeyedIntTestObject> map = newTestMap(10, null);
-    if (!(map instanceof KeyedIntObjectHash)) {
+    final Map<Double, KeyedDoubleTestObject> map = newTestMap(10, null);
+    if (!(map instanceof KeyedDoubleObjectHash)) {
       return;
     }
-    KeyedIntObjectHash<KeyedIntTestObject> KIOM = ((KeyedIntObjectHash<KeyedIntTestObject>) map);
+    KeyedDoubleObjectHash<KeyedDoubleTestObject> KIOM =
+        ((KeyedDoubleObjectHash<KeyedDoubleTestObject>) map);
 
-    final HashMap<Integer, KeyedIntTestObject> objects =
+    final HashMap<Double, KeyedDoubleTestObject> objects =
         generateUniqueRandomHashMap(SIZE * 10, MIN_KEY, MAX_KEY);
-    final KIOMPutIfAbsentFactory<KeyedIntTestObject> factory =
+    final KIOMPutIfAbsentFactory<KeyedDoubleTestObject> factory =
         new KIOMPutIfAbsentFactory<>(objects);
     final int NUM_THREADS = 5;
     final int NUM_RUNS = 100;
@@ -302,12 +304,12 @@ public class TestKeyedIntObjectHashMap extends AbstractTestGenericMap<Integer, K
   }
 
   public void testKIOMConcurrentGet() {
-    final Map<Integer, KeyedIntTestObject> map = newTestMap(10, null);
+    final Map<Double, KeyedDoubleTestObject> map = newTestMap(10, null);
     if (!(map instanceof KeyedIntObjectHash)) {
       return;
     }
-    final KeyedIntObjectHash<KeyedIntTestObject> SUT =
-        ((KeyedIntObjectHash<KeyedIntTestObject>) map);
+    final KeyedIntObjectHash<KeyedDoubleTestObject> SUT =
+        ((KeyedIntObjectHash<KeyedDoubleTestObject>) map);
 
     final long MILLIS = 1000;
 
@@ -318,7 +320,7 @@ public class TestKeyedIntObjectHashMap extends AbstractTestGenericMap<Integer, K
             long t0 = System.currentTimeMillis();
             while (System.currentTimeMillis() < t0 + MILLIS) {
               for (int i = 0; i < SUT.capacity(); ++i) {
-                SUT.put(i, new KeyedIntTestObject(i));
+                SUT.put(i, new KeyedDoubleTestObject(i));
                 SUT.removeKey(i);
               }
             }

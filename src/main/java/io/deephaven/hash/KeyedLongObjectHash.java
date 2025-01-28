@@ -249,19 +249,25 @@ public class KeyedLongObjectHash<V> extends KeyedObjectHash<Long, V> implements 
   }
 
   public synchronized boolean replace(Long key, V oldValue, V newValue) {
+    if (oldValue == null) {
+      throw new NullPointerException("oldValue is null, but this map cannot hold null values");
+    }
     if (!longKeyDef.equalLongKey(key, newValue)) {
       throw new IllegalArgumentException(
           "key and value are inconsistent:" + key + " and " + longKeyDef.getLongKey(newValue));
     }
-    return internalPut(newValue, KeyedLongObjectHash.REPLACE, oldValue) != null;
+    return internalPut(newValue, KeyedLongObjectHash.REPLACE, oldValue).equals(oldValue);
   }
 
   public synchronized boolean replace(long key, V oldValue, V newValue) {
+    if (oldValue == null) {
+      throw new NullPointerException("oldValue is null, but this map cannot hold null values");
+    }
     if (!longKeyDef.equalLongKey(key, newValue)) {
       throw new IllegalArgumentException(
           "key and value are inconsistent:" + key + " and " + longKeyDef.getLongKey(newValue));
     }
-    return internalPut(newValue, KeyedLongObjectHash.REPLACE, oldValue) != null;
+    return internalPut(newValue, KeyedLongObjectHash.REPLACE, oldValue).equals(oldValue);
   }
 
   private static final int NORMAL = 0;
@@ -305,7 +311,8 @@ public class KeyedLongObjectHash<V> extends KeyedObjectHash<Long, V> implements 
           }
           return null;
         } else if (candidate != DELETED && longKeyDef.equalLongKey(key, candidate)) {
-          if (mode != KeyedLongObjectHash.IF_ABSENT) {
+          if (mode != KeyedLongObjectHash.IF_ABSENT
+              && (oldValue == null || candidate.equals(oldValue))) {
             state[index] = value;
             _indexableList = null;
           }

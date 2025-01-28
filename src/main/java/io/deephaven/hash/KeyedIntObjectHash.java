@@ -248,19 +248,25 @@ public class KeyedIntObjectHash<V> extends KeyedObjectHash<Integer, V> implement
   }
 
   public synchronized boolean replace(Integer key, V oldValue, V newValue) {
+    if (oldValue == null) {
+      throw new NullPointerException("oldValue is null, but this map cannot hold null values");
+    }
     if (!intKeyDef.equalIntKey(key, newValue)) {
       throw new IllegalArgumentException(
           "key and value are inconsistent:" + key + " and " + intKeyDef.getIntKey(newValue));
     }
-    return internalPut(newValue, KeyedIntObjectHash.REPLACE, oldValue) != null;
+    return internalPut(newValue, KeyedIntObjectHash.REPLACE, oldValue).equals(oldValue);
   }
 
   public synchronized boolean replace(int key, V oldValue, V newValue) {
+    if (oldValue == null) {
+      throw new NullPointerException("oldValue is null, but this map cannot hold null values");
+    }
     if (!intKeyDef.equalIntKey(key, newValue)) {
       throw new IllegalArgumentException(
           "key and value are inconsistent:" + key + " and " + intKeyDef.getIntKey(newValue));
     }
-    return internalPut(newValue, KeyedIntObjectHash.REPLACE, oldValue) != null;
+    return internalPut(newValue, KeyedIntObjectHash.REPLACE, oldValue).equals(oldValue);
   }
 
   private static final int NORMAL = 0;
@@ -304,7 +310,8 @@ public class KeyedIntObjectHash<V> extends KeyedObjectHash<Integer, V> implement
           }
           return null;
         } else if (candidate != DELETED && intKeyDef.equalIntKey(key, candidate)) {
-          if (mode != KeyedIntObjectHash.IF_ABSENT) {
+          if (mode != KeyedIntObjectHash.IF_ABSENT
+              && (oldValue == null || candidate.equals(oldValue))) {
             state[index] = value;
             _indexableList = null;
           }

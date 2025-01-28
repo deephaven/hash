@@ -251,19 +251,25 @@ public class KeyedDoubleObjectHash<V> extends KeyedObjectHash<Double, V> impleme
   }
 
   public synchronized boolean replace(Double key, V oldValue, V newValue) {
+    if (oldValue == null) {
+      throw new NullPointerException("oldValue is null, but this map cannot hold null values");
+    }
     if (!doubleKeyDef.equalDoubleKey(key, newValue)) {
       throw new IllegalArgumentException(
           "key and value are inconsistent:" + key + " and " + doubleKeyDef.getDoubleKey(newValue));
     }
-    return internalPut(newValue, KeyedDoubleObjectHash.REPLACE, oldValue) != null;
+    return internalPut(newValue, KeyedDoubleObjectHash.REPLACE, oldValue).equals(oldValue);
   }
 
   public synchronized boolean replace(double key, V oldValue, V newValue) {
+    if (oldValue == null) {
+      throw new NullPointerException("oldValue is null, but this map cannot hold null values");
+    }
     if (!doubleKeyDef.equalDoubleKey(key, newValue)) {
       throw new IllegalArgumentException(
           "key and value are inconsistent:" + key + " and " + doubleKeyDef.getDoubleKey(newValue));
     }
-    return internalPut(newValue, KeyedDoubleObjectHash.REPLACE, oldValue) != null;
+    return internalPut(newValue, KeyedDoubleObjectHash.REPLACE, oldValue).equals(oldValue);
   }
 
   private static final int NORMAL = 0;
@@ -307,7 +313,8 @@ public class KeyedDoubleObjectHash<V> extends KeyedObjectHash<Double, V> impleme
           }
           return null;
         } else if (candidate != DELETED && doubleKeyDef.equalDoubleKey(key, candidate)) {
-          if (mode != KeyedDoubleObjectHash.IF_ABSENT) {
+          if (mode != KeyedDoubleObjectHash.IF_ABSENT
+              && (oldValue == null || candidate.equals(oldValue))) {
             state[index] = value;
             _indexableList = null;
           }

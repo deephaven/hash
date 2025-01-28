@@ -122,6 +122,77 @@ public class TestKeyedLongObjectHashMap extends AbstractTestGenericMap<Long, Key
   }
 
   /*
+   ** tests the unboxed replace call
+   */
+  public void testSimpleUnboxedReplace() {
+    KeyedLongTestObject result;
+
+    final KeyedLongTestObjectMap m = new KeyedLongTestObjectMap(10);
+
+    final KeyedLongTestObject o1 = new KeyedLongTestObject(0);
+    final KeyedLongTestObject o2 = new KeyedLongTestObject(0);
+    final KeyedLongTestObject o3 = new KeyedLongTestObject(0);
+
+    result = m.putIfAbsent(0, o1);
+    assertNull(result);
+    assertSame(m.get(0), o1); // strict equality test
+
+    result = m.putIfAbsent(0, o2);
+    assertNotNull(result);
+    assertSame(m.get(0), o1); // strict equality test
+
+    result = m.put(0, o2);
+    assertNotNull(result);
+    assertSame(result, o1); // strict equality test
+    assertSame(m.get(0), o2); // strict equality test
+
+    assertFalse(m.replace(0, new KeyedLongTestObject(10), o3));
+    assertSame(m.get(0), o2); // strict equality test
+
+    assertTrue(m.replace(0, new KeyedLongTestObject(0), o3));
+    assertSame(m.get(0), o3); // strict equality test
+  }
+
+  /*
+   * Reproducer for bug documented in DH-18265
+   */
+  public void testDH18265() {
+    KeyedLongTestObject result;
+
+    final KeyedLongTestObjectMap m = new KeyedLongTestObjectMap(10);
+
+    // Setup the conditions for the bug to be triggered.
+    final int capacity = m.capacity();
+
+    // This will hash to 0 internally
+    final KeyedLongTestObject o1 = new KeyedLongTestObject(capacity);
+    result = m.putIfAbsent(capacity, o1);
+    assertNull(result);
+    assertSame(m.get(capacity), o1); // strict equality test
+
+    // This will also initially hash to 0, but will be double hashed to an empty slot.
+    final KeyedLongTestObject o2 = new KeyedLongTestObject(0);
+    result = m.putIfAbsent(0, o2);
+    assertNull(result);
+    assertSame(m.get(0), o2); // strict equality test
+
+    // Remove the first object, leaving a DELETED tombstone at the 0 slot.
+    result = m.remove(capacity);
+    assertNotNull(result);
+    assertSame(result, o1); // strict equality test
+
+    // This replace should fail, since we do not match old values.
+    final KeyedLongTestObject o3 = new KeyedLongTestObject(10);
+    final KeyedLongTestObject o4 = new KeyedLongTestObject(0);
+    assertFalse(m.replace(0, o3, o4));
+    assertSame(m.get(0), o2); // strict equality test
+
+    // This replace should succeed, since we match the old value.
+    assertTrue(m.replace(0, o2, o4));
+    assertSame(m.get(0), o4); // strict equality test
+  }
+
+  /*
    ** tests for KeyedLongObjectMaps -- putIfAbsent(K, ValueFactory)
    */
   public class KIOMPutIfAbsent<V> extends Thread {
