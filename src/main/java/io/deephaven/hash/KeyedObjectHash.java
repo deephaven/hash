@@ -122,12 +122,16 @@ public class KeyedObjectHash<K, V> extends KHash implements Serializable, Iterab
   /** compatible serialization ID - not present in 1.1b3 and earlier */
   static final long serialVersionUID = 1L;
 
-  /** @return true if this is a valid slot */
+  /**
+   * @return true if this is a valid slot
+   */
   protected final boolean isValid(V v) {
     return v != null && v != DELETED;
   }
 
-  /** @return the capacity of the underlying storage */
+  /**
+   * @return the capacity of the underlying storage
+   */
   public int capacity() {
     return storage.length;
   }

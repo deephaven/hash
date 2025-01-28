@@ -94,7 +94,9 @@ public abstract class KHash implements Cloneable {
     return _size;
   }
 
-  /** @return the current physical capacity of the hash table. */
+  /**
+   * @return the current physical capacity of the hash table.
+   */
   protected abstract int capacity();
 
   /**
