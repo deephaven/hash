@@ -37,6 +37,9 @@ spotless {
 java {
     withSourcesJar()
     withJavadocJar()
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
 }
 
 publishing {
