@@ -192,6 +192,21 @@ public class KeyedObjectHash<K, V> extends KHash implements Serializable, Iterab
     h.storage = (V[]) new Object[newCapacity];
     for (V v : storage) {
       if (v != null && v != DELETED) {
+        // Before adding the next value, make sure we won't recurse by verifying h._free > 2 before
+        // the add
+        if (h._free <= 2) {
+          throw new IllegalStateException(
+              "Internal error: h._free <= 2, newCapacity="
+                  + newCapacity
+                  + ", h.capacity="
+                  + h.capacity()
+                  + ", h._free="
+                  + h._free
+                  + ", h._size="
+                  + h._size
+                  + ", h._maxSize="
+                  + h._maxSize);
+        }
         h.internalPut(v, NORMAL, null);
       }
     }

@@ -210,6 +210,22 @@ public abstract class KHash implements Cloneable {
       // if we've exhausted the free spots, rehash to the same capacity,
       // which will free up any stale removed slots for reuse.
       int newCapacity = _size > _maxSize ? PrimeFinder.nextPrime(capacity() << 1) : capacity();
+
+      // Before rehashing, make sure we have not reduced the capacity below the current size.
+      if (newCapacity < capacity()) {
+        throw new IllegalStateException(
+            "Internal error: newCapacity < capacity, newCapacity="
+                + newCapacity
+                + ", capacity="
+                + capacity()
+                + ", _free="
+                + _free
+                + ", _size="
+                + _size
+                + ", _maxSize="
+                + _maxSize);
+      }
+
       rehash(newCapacity);
       computeMaxSize(capacity());
     }
