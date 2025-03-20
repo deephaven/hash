@@ -198,6 +198,14 @@ public class KeyedObjectHash<K, V> extends KHash implements Serializable, Iterab
           throw new IllegalStateException(
               "Internal error: h._free <= 2, newCapacity="
                   + newCapacity
+                  + ", capacity="
+                  + capacity()
+                  + ", _free="
+                  + _free
+                  + ", _size="
+                  + _size
+                  + ", _maxSize="
+                  + _maxSize
                   + ", h.capacity="
                   + h.capacity()
                   + ", h._free="
