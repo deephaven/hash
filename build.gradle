@@ -1,16 +1,11 @@
 plugins {
     id 'java-library'
-    id 'maven-publish'
-    id 'signing'
     id 'com.diffplug.spotless' version '7.0.2'
-}
-
-repositories {
-    jcenter()
+    id 'com.vanniktech.maven.publish' version '0.33.0'
 }
 
 group = 'io.deephaven'
-version = '0.3.0'
+version = '0.3.0-SNAPSHOT'
 description = 'Fork of trove4j library'
 
 dependencies {
@@ -35,56 +30,35 @@ spotless {
 }
 
 java {
-    withSourcesJar()
-    withJavadocJar()
     toolchain {
         languageVersion = JavaLanguageVersion.of(8)
     }
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            pom {
-                name = 'io.deephaven:hash'
-                description = 'Fork of trove4j library'
-                url = 'https://github.com/deephaven/hash'
-                licenses {
-                    license {
-                        name = 'LGPL-3.0-or-later'
-                        url = 'https://www.gnu.org/licenses/lgpl-3.0.txt'
-                    }
-                }
-                scm {
-                    url = 'https://github.com/deephaven/hash/tree/main'
-                    connection = 'scm:git:git://github.com/deephaven/hash.git'
-                    developerConnection = 'scm:git:ssh://github.com/deephaven/hash.git'
-                }
-                developers {
-                    developer {
-                        id = 'devinrsmith'
-                        name = 'Devin Smith'
-                        email = 'devinsmith@deephaven.io'
-                    }
-                }
-
+mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
+    pom {
+        name = 'io.deephaven:hash'
+        description = 'Fork of trove4j library'
+        url = 'https://github.com/deephaven/hash'
+        licenses {
+            license {
+                name = 'LGPL-3.0-or-later'
+                url = 'https://www.gnu.org/licenses/lgpl-3.0.txt'
+            }
+        }
+        scm {
+            url = 'https://github.com/deephaven/hash/tree/main'
+            connection = 'scm:git:git://github.com/deephaven/hash.git'
+            developerConnection = 'scm:git:ssh://github.com/deephaven/hash.git'
+        }
+        developers {
+            developer {
+                id = 'devinrsmith'
+                name = 'Devin Smith'
+                email = 'devinsmith@deephaven.io'
             }
         }
     }
-    repositories {
-        maven {
-            name = 'ossrh'
-            // Will pick up ossrhUsername, ossrhPassword
-            credentials(PasswordCredentials)
-
-            def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-        }
-    }
-}
-
-signing {
-    sign publishing.publications.mavenJava
 }
