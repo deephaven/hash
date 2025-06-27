@@ -34,6 +34,9 @@ spotless {
 }
 
 java {
+    // https://github.com/vanniktech/gradle-maven-publish-plugin/issues/1028
+    // withSourcesJar()
+    // withJavadocJar()
     toolchain {
         languageVersion = JavaLanguageVersion.of(8)
     }
