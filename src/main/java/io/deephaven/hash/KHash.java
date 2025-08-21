@@ -185,8 +185,9 @@ public abstract class KHash implements Cloneable {
    * @param capacity an <code>int</code> value
    */
   private final void computeMaxSize(int capacity) {
-    // need at least one free slot for open addressing
-    _maxSize = Math.min(capacity - 1, (int) Math.floor(capacity * _loadFactor));
+    // need at least two free slots for open addressing since we rehash when only one free slot
+    // remains
+    _maxSize = Math.min(capacity - 2, (int) Math.floor(capacity * _loadFactor));
     _free = capacity - _size; // reset the free element count
   }
 

@@ -12,6 +12,7 @@
 package io.deephaven.hash;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * This collection implements a hashed set of objects identified by a key; the characteristics of
@@ -258,7 +259,7 @@ public class KeyedDoubleObjectHash<V> extends KeyedObjectHash<Double, V> impleme
       throw new IllegalArgumentException(
           "key and value are inconsistent:" + key + " and " + doubleKeyDef.getDoubleKey(newValue));
     }
-    return internalPut(newValue, KeyedDoubleObjectHash.REPLACE, oldValue).equals(oldValue);
+    return Objects.equals(internalPut(newValue, KeyedDoubleObjectHash.REPLACE, oldValue), oldValue);
   }
 
   public synchronized boolean replace(double key, V oldValue, V newValue) {
@@ -269,7 +270,7 @@ public class KeyedDoubleObjectHash<V> extends KeyedObjectHash<Double, V> impleme
       throw new IllegalArgumentException(
           "key and value are inconsistent:" + key + " and " + doubleKeyDef.getDoubleKey(newValue));
     }
-    return internalPut(newValue, KeyedDoubleObjectHash.REPLACE, oldValue).equals(oldValue);
+    return Objects.equals(internalPut(newValue, KeyedDoubleObjectHash.REPLACE, oldValue), oldValue);
   }
 
   private static final int NORMAL = 0;
