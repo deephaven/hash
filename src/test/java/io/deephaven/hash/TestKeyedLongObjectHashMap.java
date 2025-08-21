@@ -100,6 +100,83 @@ public class TestKeyedLongObjectHashMap extends AbstractTestGenericMap<Long, Key
     super.tearDown();
   }
 
+  /**
+   * Test a matrix of (low) capacity starting conditions and a range of load factors. This test will
+   * expose starting conditions that are likely to cause problems with the hash table
+   * implementation.
+   */
+  public void testCapacityAndLoadFactor() {
+    // Test some very high LF edge cases
+    testCapacityAndLoadFactor(0, 0.99999999f);
+    testCapacityAndLoadFactor(1, 0.99999999f);
+    testCapacityAndLoadFactor(2, 0.99999999f);
+    testCapacityAndLoadFactor(3, 0.99999999f);
+    testCapacityAndLoadFactor(4, 0.99999999f);
+    testCapacityAndLoadFactor(5, 0.99999999f);
+
+    // Test a matrix of starting conditions.
+    for (float loadFactor = 0.001f; loadFactor < 1.0f; loadFactor += 0.001f) {
+      for (int capacity = 0; capacity < 100; ++capacity) {
+        testCapacityAndLoadFactor(capacity, loadFactor);
+      }
+    }
+  }
+
+  private void testCapacityAndLoadFactor(final int capacity, final float loadFactor) {
+    final KeyedLongTestObjectMap m = new KeyedLongTestObjectMap(capacity, loadFactor);
+
+    for (int i = 0; i < capacity * 2; ++i) {
+      if (m.size() >= m.capacity() - 1) {
+        // remove the first key
+        final KeyedLongTestObject o = m.getByIndex(0);
+        m.remove(o.getId());
+      }
+
+      // add a random key
+      final long key = random.nextInt(10);
+      final KeyedLongTestObject o = new KeyedLongTestObject(key);
+      try {
+        m.add(o);
+      } catch (IllegalStateException ex) {
+        throw new IllegalStateException(
+            "testAddRemove: capacity = " + capacity + ", loadFactor = " + loadFactor, ex);
+      }
+    }
+  }
+
+  /**
+   * Reproducer for bug documented in DH-19237, where a normal replace() call incorrectly throws NPE
+   */
+  public void testDH19237() {
+    final KeyedLongTestObjectMap m1 = new KeyedLongTestObjectMap();
+    KeyedLongTestObject o1 = new KeyedLongTestObject(1);
+    KeyedLongTestObject o2 = new KeyedLongTestObject(1);
+
+    boolean replaced;
+
+    replaced = m1.replace(1, o2, o1);
+    assertFalse("replace() should not return true when value not found", replaced);
+    assertSame(m1.get(1), null); // confirm replace failed
+
+    m1.add(o1);
+    replaced = m1.replace(1, o1, o2);
+    assertTrue("replace() should return true when value found and replaced", replaced);
+    assertSame(m1.get(1), o2);
+
+    // Repeat using boxed datatype
+    final KeyedLongTestObjectMap m2 = new KeyedLongTestObjectMap();
+    final Long l1 = 1L;
+
+    replaced = m2.replace(l1, o1, o2);
+    assertFalse("replace() should not return true when value not found", replaced);
+    assertSame(m2.get(l1), null); // confirm replace failed
+
+    m2.add(o1);
+    replaced = m2.replace(l1, o2, o1);
+    assertTrue("replace() should return true when value found and replaced", replaced);
+    assertSame(m2.get(l1), o1);
+  }
+
   /*
    ** tests the unboxed putIfAbsent call
    */

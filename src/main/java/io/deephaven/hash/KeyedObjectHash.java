@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -734,7 +735,7 @@ public class KeyedObjectHash<K, V> extends KHash implements Serializable, Iterab
       throw new IllegalArgumentException(
           "key and value are inconsistent:" + key + " and " + keyDef.getKey(newValue));
     }
-    return internalPut(newValue, REPLACE, oldValue).equals(oldValue);
+    return Objects.equals(internalPut(newValue, REPLACE, oldValue), oldValue);
   }
 
   public synchronized boolean add(V value) {
